@@ -1,0 +1,41 @@
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(MASS)
+library(lmtest)
+library(tidyverse)
+covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+Sys.setlocale("LC_TIME", "English")
+library(patchwork)
+covid$weekdays <- factor(weekdays(covid$Date_reported),
+    levels=c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
+covid$weekend <- ifelse(weekdays(covid$Date_reported)%in%c('Saturday','Sunday'),'Weekend','Weekdays')#Change the day of the week into a binary variable, weekend or weekday
+#p1 is the histogram from Monday to Sunday, p2 is the histogram for weekends and weekdays
+p1<- covid%>%
+  group_by(weekdays)%>%
+  summarise(New_cases = mean(New_cases))%>%
+  ggplot(aes(weekdays,New_cases))+
+  geom_col(fill='steelblue')+
+  theme_classic()+
+  ylab('Mean of New Cases')
+
+p2<-covid%>%
+  group_by(weekend)%>%
+  summarise(New_cases = mean(New_cases))%>%
+  ggplot(aes(weekend,New_cases,fill=weekend))+
+  geom_col()+
+  scale_fill_brewer(palette = 'Pastel1')+
+  theme_classic()+
+  theme(legend.position = 'bottom')+
+  ylab('Mean of New Cases')
+p1+p2
+a <- subset(covid,New_cases>0)#Extract new people>0, because log must require x to be greater than 0
+hist(a$New_cases,xlab='New cases',main='',col='lightblue')#New cases histogram
+hist(log(a$New_cases),xlab='New cases after Log Trasformation',main='',col='steelblue')#Histogram after logarithmization of new cases
+fit <- lm(log(New_cases)~weekend,data=a)
+summary(fit)
+plot(fit,1)
+plot(fit,2)
+fit2=lm(New_cases~weekend,data=a)
+boxcox(fit2)
+plot(fit,3)
+bptest(fit)
+plot(fit,5)
