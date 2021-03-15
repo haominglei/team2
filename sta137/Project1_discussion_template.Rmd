@@ -1,0 +1,64 @@
+---
+title: "Project STAR Discussion Report"
+author: "Name: Haoming Lei, Student ID: 916214304, Team ID: Team 2"
+date: "02/03/2021"
+output:
+  html_document:
+    toc_float: true
+    theme: default
+    toc: true
+    highlight: tango
+    number_sections: no
+---
+
+
+
+# Overall Review
+
+After reviewing the feedback that my colleague has suggested to my report.  I have gained the knowledge about what I should improve on in my report.What is the assumption and why would I use the method to test for the experiment. For every chunk of my results, I lacked explanations about what the results were telling to the readers. I should have interpretations on each graph to make the readers understand what the graphs indicated.
+
+
+
+# Major Issues 
+
+# 1.Organization
+
+In a general report, titles and labels are important to readers. It is an organization skill as an author. Abstract and background information should be separated in the report. Therefore, I would fix it by labeling every chunk, then revise my abstract and background information, so it makes the reader easier to read and easier to find the information they wanted to know.  
+
+# 2. Formatting
+
+Code formatting is also an important skill to finish the report. Because readers wants to know what code I used, or what equations I used to apply the results. So I would fix it by using Latex format to display the equations in colors.
+
+# 3.Assumption:
+
+People are concerned about what aspects of the experimental design fulfill the ANOVA assumptions. I should have given an explanation. Assumption from this model is that all observations are normal distributed and randomly selected independently.
+
+# 4.Reasons of using Anova method
+
+In the report, I used the Anova method and the Tukey method for the model to analyze. For the Anova table, we used to estimate two or more variables mean, and the change of the quantitative variables. In this experiment, we have three variables which are small class, regular class, and regular+aide class, and a response variable, which is math scaled scores. So we wanted to know if there is any effect for the math scaled scores by distributing 399 observation into three categories of class. It indicated what the mean values for each variable, and does this effect to the response variables. After using anova method, I also used tukey procedure, it can find the means of significance from each other, and to carry out the next step of the test, which is to find the best variable to rebuild the model and look at if there is any change of the function.
+
+# 5.Graphs interpretations
+
+By showing the graphs and not interpreting is not a complete report. By showing a plot could have multiple information to make the readers have a clear view to know what the experiment is comparing. But we also want to let the reader know which plots in the graphs represent the specific variables, what is the reason and why the plots indicated in the graphs. 
+
+For the boxplot, I have used the mean scores, class type, school id, and teacher id from the 339 observations distributed into three groups. The solid line at the middle indicated the mean of average scores for each class. Therefore, we could know which class has the highest and lowest mean by showing the plots. 
+
+For the residual vs fitted values graph, we can see that the plots are distributed everywhere, there is no variables that focus on one place. And the red bar is overlapping on the horizontal line, which is equal to 0. That indicated the variances of the error terms are equal, therefore is a check for the assumptions.
+
+For the normal Q-Q plot, almost all plots are overlapping on the linear line, only a few plots are outline, that can is also a check for the assumption of normal distribution.
+
+The scale-location plot and Residuals vs Leverage plot is similar to residual vs fitted plots, The line is also overlapping the horizontal line,the average magnitude of the standardized residuals is not changing much as a function of the fitted values.
+
+The residual vs Leverage plot shows if there are significant effect from the variables, if the leverage points are high, we can detected there are significant effect. 
+
+# 6.Reference
+
+Doing a reteach project by having my own sources doesn't have enough evidence to prove in the report, therefore searching from the internet, collecting data is also a technique in statistic. After getting resources from others, we should give them credit, and I should have included the reference by doing citation and acknowledgment.
+
+
+# Minor comments 
+
+In a professional report, grammar and typo is also significant for author to pay attentions, check for the vocabulary using in an accurate way. 
+
+
+

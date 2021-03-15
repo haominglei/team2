@@ -1,0 +1,69 @@
+---
+title: "hw1"
+author: "haoming lei"
+date: "1/14/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Obtain a histogram for each of the variables
+library("readxl")
+mydata=cars931 <- read_excel("C:/Users/Administrator/Desktop/sta137/cars931.xlsx")
+head(mydata)
+Y=log(mydata$Price)
+X1=log(mydata$`City mpg`)
+X2=log(mydata$`Hwy mpg`)
+X3=log(mydata$`Engine size`)
+X4=sqrt(mydata$HP)
+X5=mydata$Tank
+X6=mydata$Weight
+hist(Y,main="Distribution of Price")#Bimodal distribution
+hist(X1,main="Distribution of City mpg")#right-skewed distribution 
+hist(X2,main="Distribution of Hwy mpg")#Bimodal distribution
+hist(X3,main="Distribution of Engine size")#Plateau distribution  
+hist(X4,main="Distribution of HP")#Edqe peak distribution
+hist(X5,main="Distribution of Tank")#Bimodal distribution
+hist(X6,main="Distribution of Weight")#Plateau distribution 
+#结论
+```
+
+Appendix
+
+library("readxl")
+
+mydata=cars931 <- read_excel("C:/Users/Administrator/Desktop/sta137/cars931.xlsx")
+
+head(mydata)
+
+Y=log(mydata$Price)
+
+X1=log(mydata$`City mpg`)
+X2=log(mydata$`Hwy mpg`)
+
+X3=log(mydata$`Engine size`)
+
+X4=sqrt(mydata$HP)
+
+X5=mydata$Tank
+
+X6=mydata$Weight
+
+hist(Y,main="Distribution of Price")#Bimodal distribution
+
+hist(X1,main="Distribution of City mpg")#right-skewed distribution 
+
+hist(X2,main="Distribution of Hwy mpg")#Bimodal distribution
+
+hist(X3,main="Distribution of Engine size")#Plateau distribution  
+
+hist(X4,main="Distribution of HP")#Edqe peak distribution
+
+hist(X5,main="Distribution of Tank")#Bimodal distribution
+
+hist(X6,main="Distribution of Weight")#Plateau distribution 

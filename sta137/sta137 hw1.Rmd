@@ -1,0 +1,161 @@
+---
+title: "STA137 HW1"
+author: "Haoming Lei，Chunqiu Li, Yirui Li"
+output:
+  pdf_document: 
+    latex_engine : xelatex
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+1.
+(a)
+```{r}
+#Obtain a histogram for each of the variables
+library("readxl")
+mydata = read_excel("cars931.xlsx")
+head(mydata)
+Y=log(mydata$Price)
+X1=log(mydata$`City mpg`)
+X2=log(mydata$`Hwy mpg`)
+X3=log(mydata$`Engine size`)
+X4=sqrt(mydata$HP)
+X5=mydata$Tank
+X6=mydata$Weight
+hist(Y,main="Distribution of Price")#Bimodal distribution
+hist(X1,main="Distribution of City mpg")#right-skewed distribution 
+hist(X2,main="Distribution of Hwy mpg")#Bimodal distribution
+hist(X3,main="Distribution of Engine size")#Plateau distribution  
+hist(X4,main="Distribution of HP")#Edqe peak distribution
+hist(X5,main="Distribution of Tank")#Bimodal distribution
+hist(X6,main="Distribution of Weight")#Plateau distribution 
+```
+
+(b)
+```{r}
+#Obtain an matrix of the data
+pairs(mydata[,c(1,2,3,4,5,6,7)], panel = panel.smooth, main = "Cars data", pch = 19, cex=0.5)
+```
+
+```{r}
+#Compute correlation matrix 
+cor(X1,Y)
+cor(X2,Y)
+cor(X3,Y)
+cor(X4,Y)
+cor(X5,Y)
+cor(X6,Y)
+```
+#What do the plots suggest about the nature of relationship between Y and each of the predictor variables?
+City mpg and price seem to be negative correlated. Hgy mpg and price seem to be negative correlated. Eng size and price seem to be positive correlated. HP and price seem to be positive correlated. Tank and price seem to be positive correlated. Weight and price seem to be positive correlated. 
+
+
+#Does it seem that there is a problem of multicollinearity?
+Yes, there is a problem of multicollinearity. For the predictor of the engine size, HP, Tank, Weight, they are closed to 1. Thus indicated a further investigation.  
+
+(c)
+```{r}
+#compute parameter estimates
+model1=lm(Y~X1+X2+X3+X4+X5+X6)
+model1
+#standard errors,R2,Adj_R2
+summary(model1)
+#analysis of variance table
+aov1<-anova(model1)
+aov1
+```
+
+(d)
+We show the summary table of the model below:
+```{r}
+sum1=summary(model1)$coefficients
+sum1
+```
+According to the t-statistics and their corresponding p-value table, we consider deleting the predictor of City mpg, which is X1, because the t-value of x1 is -1.7764325, which is the smallest, therefore, its less related to Y. 
+
+2.
+
+(a)
+
+##Does it seem that the fitted model is reasonable? Do you suspect any nonlinearity? Is the assumption of equal variance of the errors (ie, " i ’s) reasonable here? Explain your answers
+```{r}
+Y_hat<-model1$fitted.values
+plot(Y_hat,Y)
+abline(lm(Y~Y_hat))
+plot(model1,which=1)
+```
+It seems that the fitted model is reasonable, and we do not worrry about nonlinearity. The assumption of equal variance of the errors is reasonable here because even some points are away from the line, the trend shows that points continuously approach the line, most of the points fall approximately along the regression line.  
+
+(c)
+##Is the assumption of normality of the errors reasonable? Explain.
+The assumption of normality of the errors is reasonable because in the second graph, we can see that points located closer to the straight line. 
+```{r}
+res<-model1$residuals
+hist(res,main="Histgram of residuals",xlab="Residuals")
+qqnorm(res,ylab="Residuals",main="Normal probability plot of the residuals")
+qqline(res)
+```
+3 
+(a)
+```{r}
+null=lm(Y~1)
+library(MASS)
+#base on AIC
+stepAIC(model1, scope=list(upper=model1,lower=~1),direstion="backward",k=2,trace=FALSE)
+#base on BIC
+n=93
+stepAIC(model1, scope=list(upper=model1,lower=~1),direstion="backward",k=log(n),trace=FALSE)
+```
+Then we decide our final model is:
+$$Y_i=\beta_0+\beta_1X_{i1}+\beta_4X_{i4}+\epsilon_i$$
+
+```{r}
+#obtain the parameter estimates
+final= lm(Y~X1+X4)
+final$coefficients
+#standard errors, R^2 and adj_R^2
+summary(final)
+"standard erro is 0.2434"
+"R^2 is 0.749, and Adjusted R-squared is 0.7434  "
+```
+
+(b)
+##Compare your result with the model obtained in part (a).
+```{r}
+library(leaps)
+out<-regsubsets(Y~X1+X2+X3+X4+X5+X6,data=mydata,nbest=10)#obtain all the models
+sout<-summary(out)
+sout
+p<-apply(sout$which,1,sum)
+n<-length(Y)
+bic=sout$bic
+cp=sout$cp
+
+test<-sout$which
+for (i in 1:43){
+  sh<-test[i,]
+  show<-names(sh)[sh][-1]
+  show<-paste(show,collapse="+")
+  show<-paste("Y=",show," ","Cp :",round(cp[i],digits=5),"BIC :",round(bic[i],digits=5))
+  print(show)
+}
+
+summary(show)
+```
+
+```{r}
+newmodel=lm(Y~X1+X4)
+summary(newmodel)
+"standard erro is 0.2434"
+"R^2 is 0.749, and Adjusted R-squared is 0.7434  "
+```
+#After using the different selection method,the result of part (b) is same as part (a), the best fit model is Y~X1+X4，
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
+
+
+
