@@ -1,0 +1,169 @@
+---
+title: "Project 2 Description"
+author: "Haoming lei,Kun Zhang, Handong Ma,Jianhe Hu. Team ID:2"
+date: "03/05/2021"
+output:
+  html_document:
+    toc_float: true
+    theme: default
+    toc: true
+    highlight: tango
+    number_sections: true
+    code_folding: hide
+---
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+```{r}
+library(MASS)
+library(lmtest)
+```
+# Background 
+What is Covid-19?
+Coronavirus disease (COVID-19) is an infectious disease caused by a newly discovered coronavirus.
+People who infected with the COVID-19 virus will experience mild to moderate respiratory illness and recover without requiring special treatment.  Older people, and those with underlying medical problems like cardiovascular disease, diabetes, chronic respiratory disease, and cancer are more likely to develop serious illness.
+
+How COVID-19 Spreads:
+COVID-19 is thought to spread mainly through close contact from person to person, including between people who are physically near each other (within about 6 feet). People who are infected but do not show symptoms can also spread the virus to others. 
+*COVID-19 spreads very easily from person to person
+*COVID-19 most commonly spreads during close contact
+*COVID-19 can sometimes be spread by airborne transmission
+*COVID-19 spreads less commonly through contact with contaminated surfaces
+*COVID-19 rarely spreads between people and animals
+
+# Introduction  
+In 2019, a worldwide pandemic is spread to most country on this planet. A new word “Coronavirus” or “Covid 19” is definitely one of the most serious topics in these few years. So far (2021.3.3), there are 114,442,646 people have inflected and 2,538,808 death in this catastrophe. In general, people assembling always cause a large amount of new inflected cases. In other words, usual weekday may have some relationships with the case number. Under this condition, we want to figure out is weekday do bring more new cases than the weekend. We employ the dataset that provides by the WHO. This dataset contains the number of new cases and cumulative cases in different. According to the time information, we can clearly observe the difference between the cases found in the weekdays and the cases found in the weekends. Since the Covid 19 is still widely spread in lots of country in the world, it is significant to find out the clues related with adding new cases.  To filter these variables, we are going to separate “weekdays and “weekend”. And combining date’s data with new cases and new death. Since the vaccine start affect the number of new case, we are going to focus on the data from 2020.
+
+Variables:
+Date reported: The date of one country reported new cases and new deaths
+Country-code: The shorthand of countries’ name
+Country: The full name of the countries
+WHO region: Which region this country belongs to.
+New cases: the new cases reported at that day in this country
+Cumulative cases: How many cases do this country has so far
+New deaths: the new death cases reported at that day in this country
+Cumulative deaths: How many deaths cause by Covid do this country has so far
+
+(REMINDER: Since there are still many new cases coming up everyday, our dataset is updating. Under this condtion, some specific data may not so accurate when you seeing this report.)
+
+We assume that weekdays have more new cases. And this may cause by lots of factors, such as unwilling to wear masks, jobs that can't done remotely and so on.
+
+
+# Summary
+From January 3rd,2020 to present,March 3,2020. The cumulative cases of covid-19 are 114,853,658 and the cumulative deaths are 2554,694 populations. Statistically shows the mean average of new cases is about 1135 cases in everyday, and mean average of 25 people who died because of covid-19.The mortality rate is 2.2% in the worldwide populations.
+
+
+# WHO COVID-19 data
+
+We will do an EDA for the WHO COVID-19 data. You can take a look at the [weekly WHO COVID-19 update](https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports) for reference.
+
+
+```{r echo=TRUE, eval=TRUE,message=FALSE,warning=FALSE}
+library(tidyverse)
+covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+```
+
+```{r,echo=FALSE,results='hide'}
+Sys.setlocale("LC_TIME", "English")
+```
+
+# Descriptive analysis
+
+## Histogram
+```{r,message=FALSE,fig.width=10}
+library(patchwork)
+covid$weekdays <- factor(weekdays(covid$Date_reported),
+    levels=c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
+covid$weekend <- ifelse(weekdays(covid$Date_reported)%in%c('Saturday','Sunday'),'Weekend','Weekdays')#Change the day of the week into a binary variable, weekend or weekday
+#p1 is the histogram from Monday to Sunday, p2 is the histogram for weekends and weekdays
+p1<- covid%>%
+  group_by(weekdays)%>%
+  summarise(New_cases = mean(New_cases))%>%
+  ggplot(aes(weekdays,New_cases))+
+  geom_col(fill='steelblue')+
+  theme_classic()+
+  ylab('Mean of New Cases')
+
+p2<-covid%>%
+  group_by(weekend)%>%
+  summarise(New_cases = mean(New_cases))%>%
+  ggplot(aes(weekend,New_cases,fill=weekend))+
+  geom_col()+
+  scale_fill_brewer(palette = 'Pastel1')+
+  theme_classic()+
+  theme(legend.position = 'bottom')+
+  ylab('Mean of New Cases')
+p1+p2
+```
+
+We have drawn a histogram of the average number of new COVID-19 from Monday to Sunday. It can be seen that the average value of Saturday and Sunday is significantly higher than Monday to Wednesday, slightly higher than Thursday, and basically the same as Friday. We guess that the number of new COVID-19 is related to whether it is a weekend. Therefore, we draw a histogram of the average number of new COVID-19 on weekends and weekdays. It is clear that the average number of new COVID-19 on weekends is significantly higher than that on weekdays.
+
+Although the histogram finds the difference in the number of new COVID-19 newcomers on weekends and weekdays, we do not know whether this difference is significant. Therefore, we use linear regression to explore whether the difference between the number of new COVID-19 people on weekends and weekdays is significant, and what the specific difference is.
+
+The dependent variable of the linear model is the number of new people, and the independent variable is whether it is a weekend (binary variable). At the same time, linear regression requires the dependent variable to obey a normal distribution. In fact, the number of newly-increased people obeys the Poisson distribution. From the histogram of newly-increased people, it can be seen that the number of newly-increased people is obviously to the right and does not follow the normal distribution. It can be seen from the transformed histogram that the number of newly-increased people after logarithmization is more symmetrical and can be used as a dependent variable for linear regression.
+```{r}
+a <- subset(covid,New_cases>0)#Extract new people>0, because log must require x to be greater than 0
+hist(a$New_cases,xlab='New cases',main='',col='lightblue')#New cases histogram
+hist(log(a$New_cases),xlab='New cases after Log Trasformation',main='',col='steelblue')#Histogram after logarithmization of new cases
+```
+
+## Best fit model
+```{r}
+fit <- lm(log(New_cases)~weekend,data=a)
+summary(fit)
+```
+
+The R-square and the adjusted R-square of linear regression are both low, which can indicate that whether it is a weekend has a very low explanation of the variability of the new number of people and cannot be used to predict the number of new people. However, we also used linear regression to explore the difference between the number of new people on weekends and weekdays. Since it is a one-variable linear regression, F-test and t-test are equivalent. The p-value corresponding to the weekend variable is close to 0, far less than 0.05, so we can reject the null hypothesis that the difference between the number of new people on weekends and weekdays is significant.
+
+The coefficient value is 0.11, which means that the average number of new COVID-19 people on weekends is higher than that on weekdays, exp(0.11)=1.12 people
+
+# Sensitivity analysis. 
+
+## Residual vs Fitted values
+```{r}
+plot(fit,1)
+```
+
+The vertical plots indicated there is two group of variables and there is no outline of any points, which mean there is no missing values of the function. And the horizontal red line is perfectly fit on the solid line, that concluded that the variance of the error terms are equal,and the observations of residuals are equal to zero .   
+
+## Q-Q normal plot
+```{r}
+plot(fit,2)
+```
+
+## Boxcox Transfromation
+
+```{r}
+fit2=lm(New_cases~weekend,data=a)
+boxcox(fit2)
+```
+
+The points are vary from the straight line when the quantiles at around -1.5 and 1.5 in the normal Q-Q.Therefore the assumption is not a normality distribution. Then we use a boxcox function try to do a transformation for the Q-Q plot, but we found that the lambda is equal to zero, so that verified using log for the model is the best fitted for the graph.
+
+## scaled location plot
+```{r}
+plot(fit,3)
+```
+
+## Breusch-Pagan test
+
+```{r}
+bptest(fit)
+```
+
+For the scale location plot, we have a horizontal red line, but the points has a large distance from the red line. And I used Breusch Pagan Test to check for heteroskedasticity.The p-value is smaller than 0.05 confidence interval, therefore we reject the null hypothesis. 
+
+##  Residual vs Leverage plot
+```{r}
+plot(fit,5)
+```
+
+For the residual vs leverage plot, it has a large residual, and the observation is far from the mean of x, therefore these variables has a high influence that worth to investigate.  
+
+# Conclusion
+
+In conclusion, we found that during the weekend have a higher new cases compared to weekdays globally. From the histogram on the left, the new case is increasing on the seven days average, and the histogram on the right, the weekend scale is obvious higher than weekdays scale. Then we used the weekend as dependent variable and new case as independent variable in the regression model to test if there is a strong evidence to support our question.From the anova table, the p value is 0.0002, which is smaller than 0.05 when using the 95% confidence interval, so we can reject the null hypothesis.Therefore it indicates there is strong evidence to support the new case on the weekend is higher than weekdays. I think the reason of having higher new cases during the weekend because people were still trying to go to the public even the coronavirus was happening, and the cases ratio did not decline until people have the chance to get the vaccine.  
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
+
